@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PP Moreira Lautaro</title>
+
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      body {
+        background-color: gainsboro;
+      }
+
+      h1 {
+        text-align: center;
+        text-decoration: underline black;
+      }
+      div {
+        padding-top: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="PP_FormDatos_Container">
+      <form>
+        <h1>Form Datos</h1>
+        <div>
+          <label>Filtrar por:</label>
+          <select name="select" id="PP_FormDatos_FiltrarPor">
+            <option value="Todos" selected>Todos</option>
+            <option value="ciudadano">Ciudadano</option>
+            <option value="extranjero">Extranjero</option>
+          </select>
+        </div>
+        <div>
+          <label>Calcular edad promedio:</label>
+          <input disabled id="PP_FormDatos_Edad_Promedio" />
+          <button type="button" id="PP_FormDatos_btn_calcular">Calcular</button>
+        </div>
+        <div>
+          <label>Mostrar columnas</label>
+        </div>
+        <div id="PP_FormDatos_CheckBoxs_Container"></div>
+
+        <div>
+          <table id="FormDatos_Table">
+            <thead>
+              <th class="col-id" onclick="sortTableBy('id')">Id</th>
+              <th class="col-nombre" onclick="sortTableBy('nombre')">Nombre</th>
+              <th class="col-apellido" onclick="sortTableBy('apellido')">
+                Apellido
+              </th>
+              <th
+                class="col-fechaNacimiento"
+                onclick="sortTableBy('fechaNacimiento')"
+              >
+                Fecha de nacimiento
+              </th>
+              <th class="col-paisOrigen" onclick="sortTableBy('paisOrigen')">
+                Pais de Origen
+              </th>
+              <th class="col-dni" onclick="sortTableBy('dni')">Dni</th>
+            </thead>
+            <tbody id="FormDatos_Table_Tbody"></tbody>
+          </table>
+        </div>
+        <div>
+          <button type="button" id="PP_FormDatos_BtnAgregar">Agregar</button>
+        </div>
+      </form>
+    </div>
+    <div id="PP_FormularioABM_Container" style="display: none">
+      <form>
+        <h1>Formulario ABM</h1>
+        <div>
+          <span>
+            <label>Id:</label>
+            <input disabled type="number" id="PP_FormularioABM_Id" />
+          </span>
+        </div>
+        <div>
+          <span>
+            <label>Nombre:</label>
+            <input type="text" id="PP_FormularioABM_Nombre" />
+          </span>
+        </div>
+        <div>
+          <span>
+            <label>Apellido:</label>
+            <input type="text" id="PP_FormularioABM_Apellido" />
+          </span>
+        </div>
+        <div>
+          <span>
+            <label>Fecha de nacimiento:</label>
+            <input type="number" id="PP_FormularioABM_FechaNacimiento" />
+          </span>
+        </div>
+        <div>
+          <label>Tipo:</label>
+          <select name="select" id="PP_FormularioABM_Tipo">
+            <option value="ciudadano" selected>Ciudadano</option>
+            <option value="extranjero">Extranjero</option>
+          </select>
+        </div>
+        <div
+          id="PP_FormularioABM_Campos_Ciudadano_Container"
+          style="display: none"
+        >
+          <span>
+            <label>Dni:</label>
+            <input type="number" id="PP_FormularioABM_Dni" />
+          </span>
+        </div>
+        <div
+          id="PP_FormularioABM_Campos_Extranjero_Container"
+          style="display: none"
+        >
+          <span>
+            <label>Pais de origen:</label>
+            <input type="text" id="PP_FormularioABM_PaisOrigen" />
+          </span>
+        </div>
+        <div>
+          <div>
+            <button type="button" id="PP_FormularioABM_BtnCrear" disabled>
+              Crear
+            </button>
+
+            <button type="button" id="PP_FormularioABM_BtnModificar" disabled>
+              Modificar
+            </button>
+            <button type="button" id="PP_FormularioABM_BtnEliminar" disabled>
+              Eliminar
+            </button>
+
+            <button type="button" id="PP_FormularioABM_BtnCancelar">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+
+  <script>
+    class Persona {
+      constructor(id, nombre, apellido, fechaNacimiento) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.fechaNacimiento = fechaNacimiento;
+      }
+
+      toString() {
+        return `Id: ${this.id}, Nombre: ${this.nombre}, Apellido : ${this.apellido}, Fecha de nacimiento: ${this.fechaNacimiento}`;
+      }
+    }
+
+    class Ciudadano extends Persona {
+      constructor(id, nombre, apellido, fechaNacimiento, dni) {
+        super(id, nombre, apellido, fechaNacimiento);
+        this.dni = dni;
+      }
+      toString() {
+        return `${super.toString()}, DNI: ${this.dni}`;
+      }
+    }
+
+    class Extranjero extends Persona {
+      constructor(id, nombre, apellido, fechaNacimiento, paisOrigen) {
+        super(id, nombre, apellido, fechaNacimiento, paisOrigen);
+        this.paisOrigen = paisOrigen;
+      }
+      toString() {
+        return `${super.toString()}, Pais de origen: ${this.paisOrigen}`;
+      }
+    }
+
+    const data =
+      '[{"id":1,"apellido":"Serrano","nombre":"Horacio","fechaNacimiento":19840103,"dni":45876942},{"id":2,"apellido":"Casas","nombre":"Julian","fechaNacimiento":19990723,"dni":98536214},{"id":3,"apellido":"Galeano","nombre":"Julieta","fechaNacimiento":20081103,"dni":74859612},{"id":4,"apellido":"Molina","nombre":"Juana","fechaNacimiento":19681201,"paisOrigen":"Paraguay"},{"id":5,"apellido":"Barrichello","nombre":"Rubens","fechaNacimiento":19720523,"paisOrigen":"Brazil"},{"id":666,"apellido":"Hkkinen","nombre":"Mika","fechaNacimiento":19680928,"paisOrigen":"Finlandia"}]';
+
+    let jsonData = JSON.parse(data);
+
+    let listaObjetos = jsonData.map((item) => {
+      if (item.hasOwnProperty("paisOrigen")) {
+        return new Extranjero(
+          item.id,
+          item.nombre,
+          item.apellido,
+          item.fechaNacimiento,
+          item.paisOrigen
+        );
+      } else {
+        return new Ciudadano(
+          item.id,
+          item.nombre,
+          item.apellido,
+          item.fechaNacimiento,
+          item.dni
+        );
+      }
+    });
+
+    fillDataTable(listaObjetos, "Todos");
+    createColumnsChecks("Todos");
+    initCheckbocEvents();
+
+    /*  Events  */
+
+    let filtrarPor = getElementById("PP_FormDatos_FiltrarPor");
+    filtrarPor.addEventListener("change", onChangeFiltrarPor);
+
+    let btnCalcular = getElementById("PP_FormDatos_btn_calcular");
+    btnCalcular.addEventListener("click", onClickBtnCalcular);
+
+    let formTypeElement = getElementById("PP_FormularioABM_Tipo");
+    formTypeElement.addEventListener("change", onChangeFormTypeElement);
+
+    let btnCrear = getElementById("PP_FormularioABM_BtnCrear");
+    btnCrear.addEventListener("click", onClickBtnAceptar);
+
+    let btnEliminar = getElementById("PP_FormularioABM_BtnEliminar");
+    btnEliminar.addEventListener("click", onClickBtnEliminar);
+
+    let btnModificar = getElementById("PP_FormularioABM_BtnModificar");
+    btnModificar.addEventListener("click", onClickBtnModificar);
+
+    let btnCancelar = getElementById("PP_FormularioABM_BtnCancelar");
+    btnCancelar.addEventListener("click", onClickBtnCancelar);
+
+    let btnAgregar = getElementById("PP_FormDatos_BtnAgregar");
+    btnAgregar.addEventListener("click", onClickBtnAgregar);
+
+    /*  Fucntions */
+    function initCheckbocEvents() {
+      let inputCheckBoxs = document.querySelectorAll('input[type="checkbox"]');
+      inputCheckBoxs.forEach((checkbox) => {
+        checkbox.addEventListener("change", (event) => {
+          let elements = document.querySelectorAll(
+            ".col-" + checkbox.value + ":not(input)"
+          );
+
+          for (var i = 0; i < elements.length; i++) {
+            if (checkbox.checked) {
+              elements[i].style.display = "table-cell";
+            } else {
+              elements[i].style.display = "none";
+            }
+          }
+        });
+      });
+    }
+
+    function createCheckbox(className, id, value, labelText) {
+      let label = document.createElement("label");
+      let checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = className;
+      checkbox.checked = true; // Set default checked state
+      checkbox.id = id;
+      checkbox.value = value;
+
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(labelText));
+
+      return label;
+    }
+
+    function sortTableBy(prop) {
+      let filtrarPor = getElementById("PP_FormDatos_FiltrarPor").value;
+      let filteredArray = filterArrayByType(filtrarPor);
+
+      fillDataTable(sortByProperty(filteredArray, prop), filtrarPor);
+    }
+
+    function sortByProperty(arr, prop) {
+      return arr.sort((a, b) => {
+        if (a[prop] === null || a[prop] === undefined) {
+          return 1;
+        } else if (b[prop] === null || b[prop] === undefined) {
+          return -1;
+        } else if (a[prop] < b[prop]) {
+          return -1;
+        } else if (a[prop] > b[prop]) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    }
+
+    function onClickBtnAgregar() {
+      initAbmForm();
+
+      getElementById("PP_FormularioABM_BtnCrear").disabled = false;
+      getElementById("PP_FormularioABM_BtnEliminar").disabled = true;
+      getElementById("PP_FormularioABM_BtnModificar").disabled = true;
+    }
+
+    function onClickBtnEliminar() {
+      let id = getElementById("PP_FormularioABM_Id").value;
+      if (id) {
+        deleteItemFromArray(id);
+      }
+
+      showFormData();
+      clearFormData();
+      hideForm();
+    }
+
+    function onClickBtnAceptar() {
+      saveData();
+    }
+
+    function onClickBtnModificar() {
+      saveData();
+    }
+
+    function onClickBtnCancelar() {
+      showFormData();
+      clearFormData();
+      hideForm();
+    }
+
+    function initAbmForm(data) {
+      showForm();
+      clearFormData();
+      if (data) {
+        setFormData(data);
+      }
+      hideFormData();
+    }
+
+    function showForm() {
+      let formContainer = getElementById("PP_FormularioABM_Container");
+      let camposCiudadano = getElementById(
+        "PP_FormularioABM_Campos_Ciudadano_Container"
+      );
+      let camposExtranjero = getElementById(
+        "PP_FormularioABM_Campos_Extranjero_Container"
+      );
+
+      formContainer.style.display = "block";
+      camposExtranjero.style.display = "block";
+      camposCiudadano.style.display = "hide";
+    }
+
+    function hideForm() {
+      let formContainer = getElementById("PP_FormularioABM_Container");
+      formContainer.style.display = "none";
+    }
+
+    function showFormData() {
+      let formContainer = getElementById("PP_FormDatos_Container");
+      formContainer.style.display = "block";
+    }
+
+    function hideFormData() {
+      let formContainer = getElementById("PP_FormDatos_Container");
+      formContainer.style.display = "none";
+    }
+
+    function clearFormData(data) {
+      let idInput = getElementById("PP_FormularioABM_Id");
+      idInput.value = "";
+
+      let nombreInput = getElementById("PP_FormularioABM_Nombre");
+      nombreInput.value = "";
+
+      let apellidoInput = getElementById("PP_FormularioABM_Apellido");
+      apellidoInput.value = "";
+
+      let fechaNacimientoInput = getElementById(
+        "PP_FormularioABM_FechaNacimiento"
+      );
+      fechaNacimientoInput.value = "";
+
+      let dniInput = getElementById("PP_FormularioABM_Dni");
+      dniInput.value = "";
+
+      let paisOrigenInput = getElementById("PP_FormularioABM_PaisOrigen");
+      paisOrigenInput.value = "";
+    }
+
+    function saveData() {
+      let tipo = getElementById("PP_FormularioABM_Tipo").value;
+      let data = getFormData(tipo);
+      let isAdd = true;
+
+      if (!validData(data, tipo)) {
+        return;
+      }
+
+      if (data.id) {
+        isAdd = false;
+        let existingElement = listaObjetos.find((x) => x.id == data.id);
+        if (existingElement) {
+          for (let key in data) {
+            existingElement[key] = data[key];
+          }
+
+          //   if (existingElement.constructor.name != capitalizeFirstLetter(tipo)) {
+          //   }
+        }
+      }
+
+      if (isAdd) {
+        if (data.hasOwnProperty(dni)) {
+          listaObjetos.push(
+            new Ciudadano(
+              item.id,
+              item.nombre,
+              item.apellido,
+              item.fechaNacimiento,
+              item.dni
+            )
+          );
+        } else {
+          listaObjetos.push(
+            new Extranjero(
+              item.id,
+              item.nombre,
+              item.apellido,
+              item.fechaNacimiento,
+              item.paisOrigen
+            )
+          );
+        }
+      }
+
+      showFormData();
+      hideForm();
+
+      let filtrarPor = getElementById("PP_FormDatos_FiltrarPor").value;
+      let filteredArray = filterArrayByType(filtrarPor);
+      createColumnsChecks(filtrarPor);
+      initCheckbocEvents();
+      fillDataTable(filteredArray, filtrarPor);
+    }
+
+    function getFormData(tipo) {
+      let data = {};
+
+      data.id = getElementById("PP_FormularioABM_Id").value;
+      data.nombre = getElementById("PP_FormularioABM_Nombre").value;
+      data.apellido = getElementById("PP_FormularioABM_Apellido").value;
+      data.fechaNacimiento = getElementById(
+        "PP_FormularioABM_FechaNacimiento"
+      ).value;
+
+      if (tipo == "ciudadano") {
+        data.dni = getElementById("PP_FormularioABM_Dni").value;
+        data.paisOrigen = "";
+      } else {
+        data.paisOrigen = getElementById("PP_FormularioABM_PaisOrigen").value;
+        data.dni = "";
+      }
+
+      if (data.id == "" || data.id == undefined) {
+        data.id = getNextId();
+      }
+
+      return data;
+    }
+
+    function getNextId() {
+      return Math.max(...listaObjetos.map((x) => x.id)) + 1;
+    }
+
+    function validData(data, tipo) {
+      let success = true;
+
+      if (data.nombre == "") {
+        alert(`El nombre no debe ser nulo`);
+        success = false;
+      }
+
+      if (data.apellido == "") {
+        alert(`El apellido no debe ser nulo`);
+        success = false;
+      }
+
+      if (data.fechaNacimiento == "") {
+        alert(`La fecha de nacimiento no debe ser nulo`);
+        success = false;
+      }
+
+      if (tipo == "ciudadano") {
+        if (isNaN(data.dni)) {
+          alert(`El dni debe ser un numero`);
+          success = false;
+        }
+      } else {
+        if (data.paisOrigen == "") {
+          alert(`El pais de origen no debe ser nulo`);
+          success = false;
+        }
+      }
+      return success;
+    }
+
+    function setFormData(data) {
+      let idInput = getElementById("PP_FormularioABM_Id");
+      idInput.value = data.id;
+
+      let nombreInput = getElementById("PP_FormularioABM_Nombre");
+      nombreInput.value = data.nombre;
+
+      let apellidoInput = getElementById("PP_FormularioABM_Apellido");
+      apellidoInput.value = data.apellido;
+
+      let fechaNacimientoInput = getElementById(
+        "PP_FormularioABM_FechaNacimiento"
+      );
+      fechaNacimientoInput.value = data.fechaNacimiento;
+
+      let dniInput = getElementById("PP_FormularioABM_Dni");
+      dniInput.value = data.dni;
+
+      let paisOrigenInput = getElementById("PP_FormularioABM_PaisOrigen");
+      paisOrigenInput.value = data.paisOrigen;
+
+      let camposCiudadano = getElementById(
+        "PP_FormularioABM_Campos_Ciudadano_Container"
+      );
+      let camposExtranjero = getElementById(
+        "PP_FormularioABM_Campos_Extranjero_Container"
+      );
+      let typeElement = getElementById("PP_FormularioABM_Tipo");
+
+      if (data.paisOrigen) {
+        typeElement.value = "extranjero";
+
+        camposCiudadano.style.display = "none";
+        camposExtranjero.style.display = "block";
+      } else {
+        typeElement.value = "ciudadano";
+        camposExtranjero.style.display = "none";
+        camposCiudadano.style.display = "block";
+      }
+    }
+
+    function onClickBtnCalcular() {
+      let filtrarPor = getElementById("PP_FormDatos_FiltrarPor");
+      let filteredArray = filterArrayByType(filtrarPor.value);
+
+      let fechaDeHoy = new Date();
+
+      let ageArray = filteredArray.map((x) => {
+        let anioNacimientoString = x.fechaNacimiento.toString().substring(0, 4);
+        let anioNacimientoInt = 0;
+        if (!isNaN(anioNacimientoString))
+          anioNacimientoInt = parseInt(anioNacimientoString);
+
+        return fechaDeHoy.getFullYear() - anioNacimientoInt;
+      });
+
+      let ageAverage = getAgeAverage(ageArray);
+      let ageAverageInput = getElementById("PP_FormDatos_Edad_Promedio");
+
+      ageAverageInput.setAttribute("value", ageAverage);
+    }
+
+    function getAgeAverage(array) {
+      let sum = array.reduce((acc, b) => {
+        return acc + b;
+      }, 0);
+
+      return sum / array.length;
+    }
+
+    function onChangeFiltrarPor(event) {
+      let personType = event.target.value;
+      let filteredArray = filterArrayByType(personType);
+
+      createColumnsChecks(personType);
+      initCheckbocEvents();
+      fillDataTable(filteredArray, personType);
+    }
+
+    function onChangeFormTypeElement(event) {
+      let type = event.target.value;
+      let camposExtranjero = getElementById(
+        "PP_FormularioABM_Campos_Extranjero_Container"
+      );
+      let camposCiudadano = getElementById(
+        "PP_FormularioABM_Campos_Ciudadano_Container"
+      );
+
+      camposExtranjero.style.display = "none";
+      camposCiudadano.style.display = "none";
+
+      if (type == "extranjero") {
+        camposExtranjero.style.display = "block";
+      } else {
+        camposCiudadano.style.display = "block";
+      }
+    }
+
+    function filterArrayByType(value) {
+      let filteredArray = [];
+      switch (value) {
+        case "ciudadano":
+          filteredArray = listaObjetos.filter(
+            (x) => x.constructor.name == "Ciudadano"
+          );
+          break;
+        case "extranjero":
+          filteredArray = listaObjetos.filter(
+            (x) => x.constructor.name == "Extranjero"
+          );
+          break;
+        default:
+          filteredArray = listaObjetos;
+          break;
+      }
+      return filteredArray;
+    }
+
+    /*
+      table
+    */
+
+    function fillDataTable(array, filterPersonType) {
+      let tbody = getElementById("FormDatos_Table_Tbody");
+      tbody.innerHTML = "";
+
+      array.forEach((person) => {
+        let row = document.createElement("tr");
+
+        //Habria que validar si la columna esta chequeada para agregarla o no
+
+        row.appendChild(getTableCeld(person.id, person.id, "col-id"));
+        row.appendChild(getTableCeld(person.nombre, person.id, "col-nombre"));
+        row.appendChild(
+          getTableCeld(person.apellido, person.id, "col-apellido")
+        );
+        row.appendChild(
+          getTableCeld(person.fechaNacimiento, person.id, "col-fechaNacimiento")
+        );
+
+        if (filterPersonType == "Todos" || filterPersonType == "extranjero") {
+          row.appendChild(
+            getTableCeld(person.paisOrigen, person.id, "col-paisOrigen")
+          );
+        }
+
+        if (filterPersonType == "Todos" || filterPersonType == "ciudadano") {
+          row.appendChild(getTableCeld(person.dni, person.id, "col-dni"));
+        }
+        tbody.appendChild(row);
+      });
+
+      let colDniTh = document.querySelectorAll("th.col-dni")[0];
+      let colPaisOrigenTh = document.querySelectorAll("th.col-paisOrigen")[0];
+
+      if (filterPersonType == "Todos" || filterPersonType == "extranjero") {
+        colPaisOrigenTh.style.display = "table-cell";
+      } else {
+        colPaisOrigenTh.style.display = "none";
+      }
+
+      if (filterPersonType == "Todos" || filterPersonType == "ciudadano") {
+        colDniTh.style.display = "table-cell";
+      } else {
+        colDniTh.style.display = "none";
+      }
+    }
+
+    function deleteItemFromArray(itemId) {
+      listaObjetos = listaObjetos.filter((x) => x.id != itemId);
+
+      let filtrarPor = getElementById("PP_FormDatos_FiltrarPor").value;
+      let filteredArray = filterArrayByType(filtrarPor);
+      createColumnsChecks(filtrarPor);
+      initCheckbocEvents();
+      fillDataTable(filteredArray, filtrarPor);
+    }
+
+    function getTableCeld(text, itemId, celdClass) {
+      let celd = document.createElement("td");
+      celd.classList.add(celdClass);
+      celd.textContent = text;
+      celd.ondblclick = () => ondblclick(itemId);
+      return celd;
+    }
+
+    function ondblclick(itemId) {
+      let itemToUpdate = listaObjetos.find((x) => x.id == itemId);
+      initAbmForm(itemToUpdate);
+
+      getElementById("PP_FormularioABM_BtnCrear").disabled = true;
+      getElementById("PP_FormularioABM_BtnEliminar").disabled = false;
+      getElementById("PP_FormularioABM_BtnModificar").disabled = false;
+    }
+
+    function createColumnsChecks(personType) {
+      let checkboxesContainer = document.getElementById(
+        "PP_FormDatos_CheckBoxs_Container"
+      );
+
+      checkboxesContainer.innerHTML = "";
+
+      checkboxesContainer.appendChild(
+        createCheckbox("col-id", "PP_FormDatos_Columna_Id", "id", "Id")
+      );
+      checkboxesContainer.appendChild(
+        createCheckbox(
+          "col-nombre",
+          "PP_FormDatos_Columna_Nombre",
+          "nombre",
+          "Nombre"
+        )
+      );
+      checkboxesContainer.appendChild(
+        createCheckbox(
+          "col-apellido",
+          "PP_FormDatos_Columna_Apellido",
+          "apellido",
+          "Apellido"
+        )
+      );
+      checkboxesContainer.appendChild(
+        createCheckbox(
+          "col-fechaNacimiento",
+          "PP_FormDatos_Columna_FechaNacimiento",
+          "fechaNacimiento",
+          "fecha de nacimiento"
+        )
+      );
+
+      if (personType == "Todos" || personType == "extranjero") {
+        checkboxesContainer.appendChild(
+          createCheckbox(
+            "col-paisOrigen",
+            "PP_FormDatos_Columna_PaisOrigen",
+            "paisOrigen",
+            "Pais de origen"
+          )
+        );
+      }
+      if (personType == "Todos" || personType == "ciudadano") {
+        checkboxesContainer.appendChild(
+          createCheckbox("col-dni", "PP_FormDatos_Columna_Dni", "dni", "DNI")
+        );
+      }
+    }
+
+    function getElementById(elementId) {
+      if (elementId) {
+        return document.getElementById(elementId);
+      }
+      return "";
+    }
+
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+  </script>
+</html>
